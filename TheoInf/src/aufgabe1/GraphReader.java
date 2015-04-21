@@ -19,6 +19,8 @@ import org.jgraph.JGraph;
 import org.jgraph.graph.DefaultGraphCell;
 import org.jgraph.graph.GraphConstants;
 import org.jgrapht.ListenableGraph;
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.alg.EulerianCircuit;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableUndirectedGraph;
@@ -35,8 +37,17 @@ public class GraphReader extends JFrame {
 	private List<String[]> edgeList = new ArrayList<String[]>();
 
 	public void init() {
-		// create a JGraphT graph
+		// create a JGraphT graph after read a graph file
 		ListenableGraph graph = buildGraph();
+
+		System.out.println("is a eulerian circuit "
+				+ EulerianCircuit.isEulerian((UndirectedGraph) graph));
+		if (EulerianCircuit.isEulerian((UndirectedGraph) graph)) {
+			System.out
+					.println("List of Vertices: "
+							+ EulerianCircuit
+									.getEulerianCircuitVertices((UndirectedGraph) graph));
+		}
 
 		// create a visualization using JGraph, via an adapter
 		jGraphModelAdapter = new JGraphModelAdapter(graph);
@@ -45,66 +56,53 @@ public class GraphReader extends JFrame {
 
 		adjustDisplaySettings(jgraph);
 		adjustGraphLayout(vertexList);
-		
+
 		// Create and set up the window.
 		JFrame frame = new JFrame("Übungsblatt 1");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.getContentPane().add(jgraph);
 
-		// Display the window.
 		frame.pack();
 		frame.setVisible(true);
 	}
-	
-
 
 	private void adjustDisplaySettings(JGraph jg) {
 		jg.setPreferredSize(DEFAULT_SIZE);
 		jg.setBackground(DEFAULT_BG_COLOR);
 	}
 
-	private String getVertexName(String line) {
-		return line.split(" ")[1];
-	}
-	
-	private String[] getEdge(String line) {
-		String[] lineSplit = line.split(" ");
-		String fromVertex = lineSplit[1];
-		String toVertex = lineSplit[2];
-		String weight = null;
-		if(lineSplit.length == 4) {
-			weight = lineSplit[3];
-		}
-		String[] result = {fromVertex, toVertex, weight};
-		return result;
-	}
-	
 	private ListenableGraph buildGraph() {
-		
-		if(isWeightedGraph(edgeList)) {
+
+		if (isWeightedGraph(edgeList)) {
 			ListenableUndirectedWeightedGraph<String, MyWeightedEdge> graph = new ListenableUndirectedWeightedGraph<String, MyWeightedEdge>(
 					MyWeightedEdge.class);
-			
-			for(String vName : vertexList) {
+
+			for (String vName : vertexList) {
 				graph.addVertex(vName);
 			}
-			
-			for(String[] edge : edgeList) {
+
+			for (String[] edge : edgeList) {
 				MyWeightedEdge currentEdge = graph.addEdge(edge[0], edge[1]);
 				graph.setEdgeWeight(currentEdge, Double.parseDouble(edge[2]));
 			}
 			return graph;
 		} else {
-			ListenableGraph graph = new ListenableUndirectedGraph(DefaultEdge.class);
+			ListenableGraph graph = new ListenableUndirectedGraph(
+					DefaultEdge.class);
+			for(String vName : vertexList) {
+				graph.addVertex(vName);
+			}
+			for(String[] edge : edgeList) {
+				graph.addEdge(edge[0], edge[1]);
+			}
 			return graph;
 		}
-		
 
 	}
-	
+
 	private boolean isWeightedGraph(List<String[]> edge) {
-		if(edge.get(0)[2] == null) {
+		if (edge.get(0)[2] == null) {
 			return false;
 		}
 		return true;
@@ -117,11 +115,11 @@ public class GraphReader extends JFrame {
 			while ((currentLine = br.readLine()) != null) {
 				System.out.println(currentLine);
 				if (!currentLine.startsWith("#")) {
-					if(currentLine.startsWith("knoten")){
-						vertexList.add(getVertexName(currentLine));
+					if (currentLine.startsWith("knoten")) {
+						vertexList.add(Util.getVertexName(currentLine));
 					}
-					if(currentLine.startsWith("kante")) {
-						edgeList.add(getEdge(currentLine));
+					if (currentLine.startsWith("kante")) {
+						edgeList.add(Util.getEdge(currentLine));
 					}
 				}
 			}
@@ -129,40 +127,27 @@ public class GraphReader extends JFrame {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void adjustGraphLayout(List<String> vertexList) {
 		int x = 50;
 		int y = 50;
-//		for(String vertex : vertexList) {
-//			x += randInt(100, 200);
-//			if(x > DEFAULT_SIZE.getWidth()) {
-//				x = randInt(100, 200);
-//				y += randInt(100, 200);
-//			}
-//			positionVertexAt(vertex, x, y);
-//		}
-		
+		// for(String vertex : vertexList) {
+		// x += randInt(100, 200);
+		// if(x > DEFAULT_SIZE.getWidth()) {
+		// x = randInt(100, 200);
+		// y += randInt(100, 200);
+		// }
+		// positionVertexAt(vertex, x, y);
+		// }
+
 		int max = ((int) DEFAULT_SIZE.getWidth() - 150);
-		for(String vertex : vertexList) {
-			x = randInt(0, max);
-			y = randInt(0, max);
+		for (String vertex : vertexList) {
+			x = Util.randInt(0, max);
+			y = Util.randInt(0, max);
 			positionVertexAt(vertex, x, y);
 		}
 	}
-	
-	public static int randInt(int min, int max) {
 
-	    // NOTE: Usually this should be a field rather than a method
-	    // variable so that it is not re-seeded every call.
-	    Random rand = new Random();
-
-	    // nextInt is normally exclusive of the top value,
-	    // so add 1 to make it inclusive
-	    int randomNum = rand.nextInt((max - min) + 1) + min;
-
-	    return randomNum;
-	}
-	
 	private void positionVertexAt(Object vertex, int x, int y) {
 		DefaultGraphCell cell = jGraphModelAdapter.getVertexCell(vertex);
 		Map attr = cell.getAttributes();
@@ -179,7 +164,7 @@ public class GraphReader extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		String filePath = "C:\\Dijkstra.txt";
+		String filePath = "C:\\Euler2.txt";
 		GraphReader demo = new GraphReader();
 		demo.readGraph(filePath);
 		demo.init();
