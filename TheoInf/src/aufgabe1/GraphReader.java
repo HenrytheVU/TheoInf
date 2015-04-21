@@ -25,6 +25,8 @@ import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableUndirectedGraph;
 import org.jgrapht.graph.ListenableUndirectedWeightedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
 
 public class GraphReader extends JFrame {
 
@@ -36,12 +38,18 @@ public class GraphReader extends JFrame {
 	private List<String> vertexList = new ArrayList<String>();
 	private List<String[]> edgeList = new ArrayList<String[]>();
 
-	public void init() {
-		// create a JGraphT graph after read a graph file
+	public void init(String filePath) {
+		
+		// read a graph file and build it
+		readGraph(filePath);
 		ListenableGraph graph = buildGraph();
 
-		System.out.println("is a eulerian circuit "
+		// check for euler shit
+		System.out.println("Graph is a eulerian circuit: "
 				+ EulerianCircuit.isEulerian((UndirectedGraph) graph));
+		System.out.println("Graph is a eulerian path: "
+				+ Util.isEulerianPath((UndirectedGraph) graph));
+		
 		if (EulerianCircuit.isEulerian((UndirectedGraph) graph)) {
 			System.out
 					.println("List of Vertices: "
@@ -49,7 +57,8 @@ public class GraphReader extends JFrame {
 									.getEulerianCircuitVertices((UndirectedGraph) graph));
 		}
 
-		// create a visualization using JGraph, via an adapter
+		System.out.println(deepFirstSearch(graph));
+		// create a visualization using JGraph, via an model adapter
 		jGraphModelAdapter = new JGraphModelAdapter(graph);
 
 		JGraph jgraph = new JGraph(jGraphModelAdapter);
@@ -67,14 +76,23 @@ public class GraphReader extends JFrame {
 		frame.setVisible(true);
 	}
 
+	private boolean deepFirstSearch(ListenableGraph graph) {
+		DepthFirstIterator<Integer, DefaultEdge> iterator = 
+                new DepthFirstIterator<Integer, DefaultEdge>(graph);
+        while (iterator.hasNext()) {
+            System.out.println( iterator.next());
+        }
+		return false;
+	}
+	
 	private void adjustDisplaySettings(JGraph jg) {
 		jg.setPreferredSize(DEFAULT_SIZE);
 		jg.setBackground(DEFAULT_BG_COLOR);
 	}
 
 	private ListenableGraph buildGraph() {
-
-		if (isWeightedGraph(edgeList)) {
+		if (Util.isWeightedGraph(edgeList)) {
+			System.out.println("Graph is a weighted G.");
 			ListenableUndirectedWeightedGraph<String, MyWeightedEdge> graph = new ListenableUndirectedWeightedGraph<String, MyWeightedEdge>(
 					MyWeightedEdge.class);
 
@@ -88,24 +106,17 @@ public class GraphReader extends JFrame {
 			}
 			return graph;
 		} else {
+			System.out.println("Graph is a unweighted G.");
 			ListenableGraph graph = new ListenableUndirectedGraph(
 					DefaultEdge.class);
-			for(String vName : vertexList) {
+			for (String vName : vertexList) {
 				graph.addVertex(vName);
 			}
-			for(String[] edge : edgeList) {
+			for (String[] edge : edgeList) {
 				graph.addEdge(edge[0], edge[1]);
 			}
 			return graph;
 		}
-
-	}
-
-	private boolean isWeightedGraph(List<String[]> edge) {
-		if (edge.get(0)[2] == null) {
-			return false;
-		}
-		return true;
 	}
 
 	private void readGraph(String filePath) {
@@ -140,10 +151,10 @@ public class GraphReader extends JFrame {
 		// positionVertexAt(vertex, x, y);
 		// }
 
-		int max = ((int) DEFAULT_SIZE.getWidth() - 150);
+		int max = ((int) DEFAULT_SIZE.getWidth() - 50);
 		for (String vertex : vertexList) {
-			x = Util.randInt(0, max);
-			y = Util.randInt(0, max);
+			x = Util.randInt(50, max);
+			y = Util.randInt(50, max);
 			positionVertexAt(vertex, x, y);
 		}
 	}
@@ -164,9 +175,8 @@ public class GraphReader extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		String filePath = "C:\\Euler2.txt";
+		String filePath = "C:\\Euler1.txt";
 		GraphReader demo = new GraphReader();
-		demo.readGraph(filePath);
-		demo.init();
+		demo.init(filePath);
 	}
 }
