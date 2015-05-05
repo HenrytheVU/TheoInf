@@ -23,8 +23,15 @@ public class Util {
 		return result;
 	}
 
-	public static String getVertexName(String line) {
-		return line.split(" ")[1];
+	public static String[] getVertex(String line) {
+		String[] lineSplit = line.split(" ");
+		String vertexName = lineSplit[1];
+		String vertexData = null;
+		if(lineSplit.length == 3) {
+			vertexData = lineSplit[2];
+		}
+		String[] result = {vertexName, vertexData};
+		return result;
 	}
 
 	public static int randInt(int min, int max) {
