@@ -31,9 +31,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.DefaultGraphCell;
+import org.jgraph.graph.Edge;
 import org.jgraph.graph.GraphConstants;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.UndirectedGraph;
+import org.jgrapht.VertexFactory;
+import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.EulerianCircuit;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
@@ -56,15 +59,15 @@ public class GraphReader extends JFrame {
 	private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
 	private static final Dimension DEFAULT_SIZE = new Dimension(800, 800);
 
-	private JGraphModelAdapter jGraphModelAdapter;
+	private JGraphModelAdapter<String, DefaultEdge> jGraphModelAdapter;
 	private JGraphFacade facade;
 	private JFrame frame;
-	ListenableGraph graph;
+	protected ListenableGraph<String, DefaultEdge> graph;
 	private List<String[]> vertexList;
 	private List<String[]> edgeList;
 	
 	public static void main(String[] args) {
-		String filePath = "bin\\Euler1.txt";
+		String filePath = "bin\\Dijkstra.txt";
 		GraphReader demo = new GraphReader();
 		demo.readGraph(filePath);
 		demo.initVisualization();
@@ -72,22 +75,15 @@ public class GraphReader extends JFrame {
 
 	public void initVisualization() {
 		
-		// check for euler shit
-		System.out.println("Graph is a eulerian circuit: "
-				+ EulerianCircuit.isEulerian((UndirectedGraph) graph));
-		System.out.println("Graph is a eulerian path: "
-				+ Util.isEulerianPath((UndirectedGraph) graph));
-
-		if (EulerianCircuit.isEulerian((UndirectedGraph) graph)) {
-			System.out
-					.println("List of Vertices: "
-							+ EulerianCircuit
-									.getEulerianCircuitVertices((UndirectedGraph) graph));
-		}
-
 		// create a visualization using JGraph, via an model adapter
-		jGraphModelAdapter = new JGraphModelAdapter(graph);
-
+		jGraphModelAdapter = new JGraphModelAdapter<String, DefaultEdge>(graph);
+		
+		DijkstraShortestPath<String, DefaultEdge> dijkstra = new DijkstraShortestPath<String, DefaultEdge>(graph, "A", "I");
+		System.out.println("Dijsktra Path Length: " + dijkstra.getPathLength());
+		System.out.println(dijkstra.getPath());
+		
+		Dijkstra.findShortestPath(graph, "A", "B");
+		
 		JGraph jgraph = new JGraph(jGraphModelAdapter);
 		
 		facade = new JGraphFacade(jgraph);
@@ -151,7 +147,7 @@ public class GraphReader extends JFrame {
 	}
 
 	private boolean deepFirstSearch(ListenableGraph graph) {
-		DepthFirstIterator<Integer, DefaultEdge> iterator = new DepthFirstIterator<Integer, DefaultEdge>(
+		DepthFirstIterator<String, DefaultEdge> iterator = new DepthFirstIterator<String, DefaultEdge>(
 				graph);
 		while (iterator.hasNext()) {
 			System.out.println(iterator.next());
@@ -185,7 +181,7 @@ public class GraphReader extends JFrame {
 			return graph;
 		} else {
 			System.out.println("Graph is a unweighted G.");
-			ListenableGraph graph = new ListenableUndirectedGraph(
+			ListenableGraph<String, DefaultEdge> graph = new ListenableUndirectedGraph<String, DefaultEdge>(
 					DefaultEdge.class);
 			for (String[] vertex : vertexList) {
 				graph.addVertex(vertex[0]);
