@@ -33,11 +33,13 @@ import org.jgraph.JGraph;
 import org.jgraph.graph.DefaultGraphCell;
 import org.jgraph.graph.Edge;
 import org.jgraph.graph.GraphConstants;
+import org.jgrapht.Graph;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.VertexFactory;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.EulerianCircuit;
+import org.jgrapht.experimental.alg.color.GreedyColoring;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableUndirectedGraph;
@@ -59,12 +61,12 @@ public class GraphReader extends JFrame {
 	private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
 	private static final Dimension DEFAULT_SIZE = new Dimension(800, 800);
 
-	private JGraphModelAdapter<String, DefaultEdge> jGraphModelAdapter;
+	private JGraphModelAdapter<Vertex, DefaultEdge> jGraphModelAdapter;
 	private JGraphFacade facade;
 	private JFrame frame;
-	protected ListenableGraph<String, DefaultEdge> graph;
-	private List<String[]> vertexList;
-	private List<String[]> edgeList;
+	protected Graph<Vertex, DefaultEdge> graph;
+	private List<Vertex> vertexList;
+	private List<MyEdge> edgeList;
 	
 	public static void main(String[] args) {
 		String filePath = "bin\\Dijkstra.txt";
@@ -76,13 +78,17 @@ public class GraphReader extends JFrame {
 	public void initVisualization() {
 		
 		// create a visualization using JGraph, via an model adapter
-		jGraphModelAdapter = new JGraphModelAdapter<String, DefaultEdge>(graph);
+		jGraphModelAdapter = new JGraphModelAdapter<Vertex, DefaultEdge>(graph);
 		
-		DijkstraShortestPath<String, DefaultEdge> dijkstra = new DijkstraShortestPath<String, DefaultEdge>(graph, "A", "I");
+		DijkstraShortestPath<Vertex, DefaultEdge> dijkstra = new DijkstraShortestPath<Vertex, DefaultEdge>(graph, findVertex("A"), findVertex("I"));
 		System.out.println("Dijsktra Path Length: " + dijkstra.getPathLength());
 		System.out.println(dijkstra.getPath());
+//		
+//		Dijkstra.findShortestPath(graph, "A", "B");
 		
-		Dijkstra.findShortestPath(graph, "A", "B");
+		GreedyColVar<Vertex, DefaultEdge> greedy = new GreedyColVar<Vertex, DefaultEdge>();
+		
+		greedy.colorGraph(graph);
 		
 		JGraph jgraph = new JGraph(jGraphModelAdapter);
 		
@@ -90,7 +96,7 @@ public class GraphReader extends JFrame {
 		adjustDisplaySettings(jgraph);
 		
 		// Create and set up the window.
-		frame = new JFrame("Übungsblatt 1");
+		frame = new JFrame("Uebungsblatt 1");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		frame.setJMenuBar(createTopMenuBar());
@@ -117,10 +123,6 @@ public class GraphReader extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.PAGE_AXIS));
 		
-		JButton resetLayoutBtn = new JButton("Random Layout");
-		resetLayoutBtn.addActionListener(new RandomLayoutAL());
-		menuBar.add(resetLayoutBtn);
-		
 		JButton fastOrganicLayoutBtn = new JButton("Fast Organic Layout");
 		fastOrganicLayoutBtn.addActionListener(new FastOrganicLayoutAL());
 		menuBar.add(fastOrganicLayoutBtn);
@@ -146,56 +148,56 @@ public class GraphReader extends JFrame {
 		return menuBar;
 	}
 
-	private boolean deepFirstSearch(ListenableGraph graph) {
-		DepthFirstIterator<String, DefaultEdge> iterator = new DepthFirstIterator<String, DefaultEdge>(
-				graph);
-		while (iterator.hasNext()) {
-			System.out.println(iterator.next());
-		}
-		return false;
-	}
-
 	private void adjustDisplaySettings(JGraph jg) {
 		jg.setPreferredSize(DEFAULT_SIZE);
 		jg.setBackground(DEFAULT_BG_COLOR);
 	}
 	
 	public void createGraph() {
-		graph = buildGraph();
+		graph = (Graph<Vertex, DefaultEdge>) buildGraph();
 	}
 
-	private ListenableGraph buildGraph() {
+	private ListenableGraph<Vertex, ?> buildGraph() {
 		if (Util.isWeightedGraph(edgeList)) {
 			System.out.println("Graph is a weighted G.");
-			ListenableUndirectedWeightedGraph<String, MyWeightedEdge> graph = new ListenableUndirectedWeightedGraph<String, MyWeightedEdge>(
-					MyWeightedEdge.class);
+			ListenableUndirectedWeightedGraph<Vertex, WeightedEdge> graph = new ListenableUndirectedWeightedGraph<Vertex, WeightedEdge>(
+					WeightedEdge.class);
 
-			for (String[] vertex : vertexList) {
-				graph.addVertex(vertex[0]);
+			for (Vertex vertex : vertexList) {
+				graph.addVertex(vertex);
 			}
 
-			for (String[] edge : edgeList) {
-				MyWeightedEdge currentEdge = graph.addEdge(edge[0], edge[1]);
-				graph.setEdgeWeight(currentEdge, Double.parseDouble(edge[2]));
+			for (MyEdge edge : edgeList) {
+				WeightedEdge currentEdge = graph.addEdge(edge.getSourceVertex(), edge.getTargetVertex());
+				graph.setEdgeWeight(currentEdge, edge.getWeight());
 			}
 			return graph;
 		} else {
 			System.out.println("Graph is a unweighted G.");
-			ListenableGraph<String, DefaultEdge> graph = new ListenableUndirectedGraph<String, DefaultEdge>(
+			ListenableGraph<Vertex, DefaultEdge> graph = new ListenableUndirectedGraph<Vertex, DefaultEdge>(
 					DefaultEdge.class);
-			for (String[] vertex : vertexList) {
-				graph.addVertex(vertex[0]);
+			for (Vertex vertex : vertexList) {
+				graph.addVertex(vertex);
 			}
-			for (String[] edge : edgeList) {
-				graph.addEdge(edge[0], edge[1]);
+			for (MyEdge edge : edgeList) {
+				graph.addEdge(edge.getSourceVertex(), edge.getTargetVertex());
 			}
 			return graph;
 		}
 	}
+	
+	public Vertex findVertex(String vertexName) {
+		for(Vertex v : vertexList) {
+			if(vertexName.equals(v.getName())){
+				return v;
+			}
+		}
+		return null;
+	}
 
 	private void readGraph(String filePath) {
-		vertexList = new ArrayList<String[]>();
-		edgeList = new ArrayList<String[]>();
+		vertexList = new ArrayList<Vertex>();
+		edgeList = new ArrayList<MyEdge>();
 		try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
 			String currentLine;
 
@@ -206,7 +208,9 @@ public class GraphReader extends JFrame {
 						vertexList.add(Util.getVertex(currentLine));
 					}
 					if (currentLine.startsWith("kante")) {
-						edgeList.add(Util.getEdge(currentLine));
+						String[] edgeInfo = Util.getEdge(currentLine);
+						MyEdge edge = new MyEdge(findVertex(edgeInfo[0]), findVertex(edgeInfo[1]), Double.parseDouble(edgeInfo[2]) );
+						edgeList.add(edge);
 					}
 				}
 			}
@@ -216,38 +220,6 @@ public class GraphReader extends JFrame {
 		createGraph();
 	}
 
-	public class RandomLayoutAL implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			adjustGraphLayout(vertexList);
-		}
-		private void adjustGraphLayout(List<String[]> vertexList) {
-			int x = 50;
-			int y = 50;
-			int max = ((int) DEFAULT_SIZE.getWidth() - 50);
-			for (String[] vertex : vertexList) {
-				String vertexName = vertex[0];
-				x = Util.randInt(50, max);
-				y = Util.randInt(50, max);
-				positionVertexAt(vertexName, x, y);
-			}
-		}
-
-		private void positionVertexAt(Object vertex, int x, int y) {
-			DefaultGraphCell cell = jGraphModelAdapter.getVertexCell(vertex);
-			Map attr = cell.getAttributes();
-			Rectangle2D b = GraphConstants.getBounds(attr);
-
-			int width = (int) b.getWidth();
-			int height = (int) b.getHeight();
-
-			GraphConstants.setBounds(attr, new Rectangle(x, y, width, height));
-
-			Map cellAttr = new HashMap();
-			cellAttr.put(cell, attr);
-			jGraphModelAdapter.edit(cellAttr, null, null, null);
-		}
-	}
 	
 	public class FastOrganicLayoutAL implements ActionListener {
 		@Override

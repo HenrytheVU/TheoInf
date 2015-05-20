@@ -23,15 +23,17 @@ public class Util {
 		return result;
 	}
 
-	public static String[] getVertex(String line) {
+	public static Vertex getVertex(String line) {
+		Vertex vertex = new Vertex();
 		String[] lineSplit = line.split(" ");
 		String vertexName = lineSplit[1];
 		String vertexData = null;
 		if(lineSplit.length == 3) {
 			vertexData = lineSplit[2];
+			vertex.setData(vertexData);
 		}
-		String[] result = {vertexName, vertexData};
-		return result;
+		vertex.setName(vertexName);
+		return vertex;
 	}
 
 	public static int randInt(int min, int max) {
@@ -39,10 +41,9 @@ public class Util {
 		return randomNum;
 	}
 	
-	public static boolean isWeightedGraph(List<String[]> edge) {
-		if (edge.get(0)[2] == null) {
-			return false;
-		}
+	public static boolean isWeightedGraph(List<MyEdge> edgeList) {
+		MyEdge firstEdge = edgeList.get(1);
+		System.out.println("firstEdge.getWeight: " + firstEdge.getWeight());
 		return true;
 	}
 
