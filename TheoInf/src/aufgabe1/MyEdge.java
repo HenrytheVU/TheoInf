@@ -5,7 +5,7 @@ public class MyEdge extends WeightedEdge {
 
 	private Vertex sourceVertex;
 	private Vertex targetVertex;
-	private double weight;
+	private double weight = Double.POSITIVE_INFINITY;
 	
 	public MyEdge(Vertex sourceVertex, Vertex targetVertex, Double weight) {
 		setSourceVertex(sourceVertex);

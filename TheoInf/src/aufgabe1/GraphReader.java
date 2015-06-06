@@ -69,7 +69,7 @@ public class GraphReader extends JFrame {
 	private List<MyEdge> edgeList;
 	
 	public static void main(String[] args) {
-		String filePath = "bin\\Dijkstra.txt";
+		String filePath = "bin"+File.separator+"Dijkstra.txt";
 		GraphReader demo = new GraphReader();
 		demo.readGraph(filePath);
 		demo.initVisualization();

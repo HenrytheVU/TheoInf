@@ -3,6 +3,7 @@ package aufgabe1;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -21,20 +22,28 @@ public class GreedyColVar<V, E> {
 
 	public void colorVertex(Graph<Vertex, E> graph, Vertex currentVertex) {
 		int min = 1;
-		List<Integer> neighborColors = new ArrayList<Integer>();
 		List<Integer> takenColors = new ArrayList<Integer>();
+		TreeSet<Integer> neighborColors = new TreeSet<Integer>();
 		for (Vertex neighborVertex : Graphs
 				.neighborListOf(graph, currentVertex)) {
 			// System.out.println("Neighbor of " + v + " is " + neighborVertex);
 			neighborColors.add(neighborVertex.getColor());
-			int minIndex = neighborColors.indexOf(Collections
-					.min(neighborColors));
-			int minColor = neighborColors.get(minIndex);
-			if (minColor == Integer.MAX_VALUE) {
-				minColor = min;
-			} else {
-				minColor = Integer.min(min, minColor);
+
+		}
+	}
+
+	public int findSmallestAvailableColor(TreeSet<Integer> colors) {
+		int minColor = colors.first();
+		if (minColor > 1) {
+			return 1;
+		} else {
+			int currentColor = minColor;
+			for (int i = 0; i < colors.size(); i++) {
+
 			}
 		}
+
+		return 0;
+
 	}
 }
