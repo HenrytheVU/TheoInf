@@ -28,20 +28,12 @@ public class DynRucksack {
     	itemList.add(i3);
     	itemList.add(i4);
     	itemList.add(i5);
-    	
-//    	multiplyValueBy(itemList, 10000);
 
         int numberOfItems = itemList.size();   // number of items
-        int maxWeight = 65;   // maximum weight of the rucksack
+        int sackCapacity = 65;   // maximum weight of the rucksack
 
         int[] value = new int[numberOfItems+1];
         int[] weight = new int[numberOfItems+1];
-
-        // generate random instance, items 1..N
-//        for (int n = 1; n <= N; n++) {
-//            value[n] = (int) (Math.random() * 1000);
-//            weight[n] = (int) (Math.random() * maxWeight);
-//        }
         
         for(int i = 0; i < itemList.size(); i++) {
         	Item item = itemList.get(i);
@@ -51,11 +43,11 @@ public class DynRucksack {
 
         // opt[n][w] = max profit of packing items 1..n with weight limit w
         // sol[n][w] = does opt solution to pack items 1..n with weight limit w include item n?
-        int[][] opt = new int[numberOfItems+1][maxWeight+1];
-        boolean[][] sol = new boolean[numberOfItems+1][maxWeight+1];
+        int[][] opt = new int[numberOfItems+1][sackCapacity+1];
+        boolean[][] sol = new boolean[numberOfItems+1][sackCapacity+1];
 
         for (int n = 1; n <= numberOfItems; n++) {
-            for (int w = 1; w <= maxWeight; w++) {
+            for (int w = 1; w <= sackCapacity; w++) {
             	counter++;
                 // don't take item n
                 int option1 = opt[n-1][w];
@@ -72,7 +64,7 @@ public class DynRucksack {
 
         // determine which items to take
         boolean[] take = new boolean[numberOfItems+1];
-        for (int n = numberOfItems, w = maxWeight; n > 0; n--) {
+        for (int n = numberOfItems, w = sackCapacity; n > 0; n--) {
             if (sol[n][w]) { take[n] = true;  w = w - weight[n]; }
             else           { take[n] = false;                    }
         }
