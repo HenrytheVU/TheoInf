@@ -27,13 +27,18 @@ public class DynRucksackBook {
 
 		return itemList;
 	}
+	
+	public static void multiplyValue(ArrayList<Item> items, int factor) {
+		for(Item item : items) {
+			item.setValue(item.getValue() * factor);
+		}
+	}
 
 	public static int getTotalValue() {
 		int result = 0;
 		for (Item item : getItemList()) {
-			result = +item.getValue();
+			result = result + item.getValue();
 		}
-		;
 		return result;
 	}
 
@@ -47,33 +52,37 @@ public class DynRucksackBook {
 	
 	public static int opt(int j, int a) {
 		if(a <= 0) return 0;
-		if((a >= 1) &&(j <= 0)) return Integer.MAX_VALUE;
-//		if(a > getValue(j)) {
-//			return opt(j-1, a); 
-//			}
+		if((a >= 1) &&(j <= 0)) return Integer.MAX_VALUE - 100;
 		return Math.min(opt(j - 1 ,a - getValue(j)) + getWeight(j), opt(j - 1, a));
 	}
 	
 	
+	public static int[][] table = new int[itemList.size()][getTotalValue()];
+	
 	// n = number of items
 	// w = total rucksack weight
 	public static int rucksack(int n, int W) {
+//		multiplyValue(itemList, 100000);
 		int a = 0;
 		do {
-			System.out.println("a : " + a);
 			a++;
 			for(int j = 1; j < n; j++) {
-				opt(j, a);
-				System.out.println("opt(j, a) ("+j+", "+ a +") = " + opt(n, a));
+				table[j][a] = opt(j, a);
 			}
-			System.out.println("opt(n, a) ("+n+", "+ a +") = " + opt(n, a));
 		} while (W > opt(n, a));
-		System.out.println("1opt(n, a) ("+n+", "+ a +") = " + opt(n, a));
 		return a - 1;
 	}
 	
 	public static void main(String[] args) {
 		int rucksackCapacity = 65;
 		System.out.println("result : " + rucksack(itemList.size() - 1, rucksackCapacity));
+		System.out.println(table.length);
+		System.out.println(table[1].length);
+		System.out.println(table[5].length);
+		for(int i = 0; i < 6; i++) {
+			for(int j = 0; j < 81; j++) {
+				System.out.println(i +"-"+j + " : "+table[i][j]);
+			}
+		}
 	}
 }
