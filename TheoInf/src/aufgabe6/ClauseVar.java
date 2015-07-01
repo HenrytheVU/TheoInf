@@ -11,17 +11,17 @@ public class ClauseVar {
 	}
 	
 	public boolean isTrue() {
-		if(isPositive && var.getValue()) {
+		if(isPositive && (var.getValue() == 1)) {
 			return true;
 		} 
-		if(!isPositive && !var.getValue()) {
+		if(!isPositive && (var.getValue() == 0)) {
 			return true;
 		}
 		return false;
 	}
 	
 	public String toString() {
-		return isPositive + "-" + var;
+		return isPositive + ":" + var;
 	}
 	
 }

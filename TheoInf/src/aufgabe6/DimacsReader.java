@@ -80,9 +80,9 @@ public class DimacsReader {
 	public void algorithmA() {
 		for (int i = 1; i < varList.size(); i++) {
 			if (Math.random() < 0.5) {
-				varList.get(i).setValue(true);
+				varList.get(i).setValue(1);
 			} else {
-				varList.get(i).setValue(false);
+				varList.get(i).setValue(0);
 			}
 		}
 	}
@@ -92,8 +92,10 @@ public class DimacsReader {
 		for(Clause clause : term) {
 			if(clause.isTrue()) {
 				result = result + 1;
+				System.out.println(1);
 			} else {
 				result = result + clause.getExpectationValue();
+				System.out.println(clause.getExpectationValue());
 			}
 		}
 		return result;
@@ -103,15 +105,15 @@ public class DimacsReader {
 		double w0;
 		double w1;
 		for(int i = 1; i < varList.size(); i++) {
-			varList.get(i).setValue(false);
+			varList.get(i).setValue(0);
 			w0 = getExpectationValue(term);
-			varList.get(i).setValue(true);
+			varList.get(i).setValue(1);
 			w1 = getExpectationValue(term);
 			System.out.println("w0 " + w0 + " | w1 "+ w1 );
 			if(w0 <= w1) {
-				varList.get(i).setValue(true);
+				varList.get(i).setValue(1);
 			} else {
-				varList.get(i).setValue(false);
+				varList.get(i).setValue(0);
 			}
 		}
 	}
@@ -127,13 +129,18 @@ public class DimacsReader {
 		System.out.println("--------------------------------------");
 
 //		reader.algorithmA();
+//		
+//		System.out.println("--------------------------------------");
+//		for(Clause clause : reader.getTerm()) {
+//			System.out.println(clause);
+//		}
 		
-		System.out.println("--------------------------------------");
+		
 		SATSolver solver = new SATSolver();
-//		System.out.println(solver.isTermTrue(reader.getTerm()));
+		System.out.println(solver.isTermTrue(reader.getTerm()));
 		
-		System.out.println("--------------------------------------");
-		System.out.println(reader.getExpectationValue(reader.getTerm()));
+//		System.out.println("--------------------------------------");
+//		System.out.println(reader.getExpectationValue(reader.getTerm()));
 		System.out.println("--- Start derandA -------");
 		reader.derandA(reader.getTerm());
 		System.out.println(solver.isTermTrue(reader.getTerm()));

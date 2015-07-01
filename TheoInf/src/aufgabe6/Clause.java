@@ -35,7 +35,6 @@ public class Clause {
 	
 	public double getExpectationValue() {
 		double result = 1 - (1/Math.pow(2, vars.size()));
-		System.out.println(result);
 		return result;
 	}
 }
