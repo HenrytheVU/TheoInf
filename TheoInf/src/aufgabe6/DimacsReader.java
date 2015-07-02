@@ -54,7 +54,7 @@ public class DimacsReader {
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
 				if (isHeadline(line)) {
-					buildVarList(getNumberOfClauses(line));
+					buildVarList(getNumberOfVariables(line));
 				} else if(!isComment(line)) {
 					Clause clause = new Clause();
 					String[] lineSplit = line.split(" ");
@@ -118,35 +118,53 @@ public class DimacsReader {
 		}
 	}
 	
+	public static void printNewMax(int oldMax, int newMax) {
+		if(newMax > oldMax) {
+			oldMax = newMax;
+			System.out.println(oldMax);
+		}
+	}
+	
 	public static void main(String[] args) {
-		File file = new File("target"+File.separator+"aim-50-1_6-no-3.cnf");
+		File file = new File("target"+File.separator+"wanka");
 		DimacsReader reader = new DimacsReader();
 		reader.readFile(file);
-		for(Clause clause : reader.getTerm()) {
-			System.out.println(clause);
-		}
+//		for(Clause clause : reader.getTerm()) {
+//			System.out.println(clause);
+//		}
 		
 		System.out.println("--------------------------------------");
 
-//		reader.algorithmA();
-//		
+		
 //		System.out.println("--------------------------------------");
 //		for(Clause clause : reader.getTerm()) {
 //			System.out.println(clause);
 //		}
 		
-		
+//		int counter = 0;
 		SATSolver solver = new SATSolver();
-		System.out.println(solver.isTermTrue(reader.getTerm()));
+//		for(int i = 0; i < 1000000000; i++) {
+//			reader.algorithmA();
+//			if(solver.isTermTrue(reader.getTerm())){
+//				System.out.println("true!");
+//			}
+//			solver.getMax(reader.getTerm());
+//			int max = solver.getMaxSastified();
+//			if(max > counter) {
+//				counter = max;
+//				System.out.println("Run: " + i + " : " + max);
+//			}
+//		}
 		
-//		System.out.println("--------------------------------------");
-//		System.out.println(reader.getExpectationValue(reader.getTerm()));
+		
+		System.out.println("--------------------------------------");
+		System.out.println(reader.getExpectationValue(reader.getTerm()));
 		System.out.println("--- Start derandA -------");
 		reader.derandA(reader.getTerm());
 		System.out.println(solver.isTermTrue(reader.getTerm()));
 		
-		for(Clause clause : reader.getTerm()) {
-			System.out.println(clause);
-		}
+//		for(Clause clause : reader.getTerm()) {
+//			System.out.println(clause);
+//		}
 	}
 }
