@@ -1,7 +1,10 @@
 package aufgabe6;
 
-public class Variable {
+import java.io.Serializable;
 
+public class Variable implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	// -1 = not occupied
 	// 0 = false
 	// 1 = true
